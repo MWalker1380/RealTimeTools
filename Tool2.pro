@@ -10,11 +10,9 @@ COMMON Toolblock, workdir
 WIDGET_CONTROL, event.id, GET_UVALUE = eventuval
 ;WIDGET_CONTROL, event.id, GET_VALUE = eventval
 
-print, 'retrieved event Uvalue ', eventuval
-
 ; establish path to documentation on Win or Unix file systems. Unix includes Linux or Mac
 
-if !version.os_family eq 'unix' then begin
+if !version.os_family eq 'unix' then begin ; if we are on a UNIX system
   reader = 'xreader '
   docsdir = workdir+'/Docs/'
   ; general docs -- the wildcards just save typing here but must be unique in directory
@@ -47,12 +45,12 @@ if !version.os_family eq 'unix' then begin
     'NMDFCB' : spawn, reader+docsdir+mdfcbF
     'J1CTHB': spawn, reader+docsdir+j1cthF
     'RDR' : spawn, reader+docsdir+rdrF
-    
+    'CAT' : launchCAT
   endcase
   
 
   
-endif else begin ;assuming this is Windows
+endif else begin ; Windows
   reader = '"c:\Program Files <x86>\Adobe\Reader 11.0\Reader\AcroRd32" '
   docsdir = workdir+'\Docs\'
   ; general docs -- the wildcards just save typing here but must be unique in directory
@@ -65,7 +63,7 @@ endif else begin ;assuming this is Windows
   ompsOps = 'OMPS/*Ops*.pdf'
   viirOps = 'VIIRS/*Ops*.pdf'
   atmsSpc = 'ATMS/*28300*.pdf'
-  
+
   case eventuval of
 
     'ACC' : LW_PLOT_ATMS
@@ -85,6 +83,7 @@ endif else begin ;assuming this is Windows
     'NMDFCB' : spawn, reader+docsdir+mdfcbF
     'J1CTHB': spawn, reader+docsdir+j1cthF, /nowait, /noshell
     'RDR' : spawn, reader+docsdir+rdrF, /nowait, /noshell
+    'CAT' : launchCAT, workdir
 
   endcase
   
@@ -99,6 +98,18 @@ endelse
 END
 
 ;;;;;;;;
+
+; This function is called by the CAT button, and launches the Matlab CAT tools for offline processing
+pro launchCAT, workdir
+  if !version.os_family eq 'unix' then begin ; if we are on a UNIX system
+    ; Use spawn to make a sysem call. run.sh (linux) cds into ../Matlab_tools and runs dashboard
+    spawn, workdir + '/../Matlab_tools/run.bat'
+  endif else begin ; else we are on windows
+    ; Use spawn to make a sysem call. run.bat (dos) cds into ../Matlab_tools and runs dashboard
+    spawn, workdir + '\..\Matlab_tools\run.bat', /nowait, /noshell
+  end
+end
+
 
 PRO Tool2, GROUP=GROUP, BLOCK=block
 
@@ -227,10 +238,8 @@ D_btn1 = WIDGET_BUTTON(Doc_menu, Value='NPP MDFCB', Uvalue='NMDFCB')
 D_btn2 = WIDGET_BUTTON(Doc_menu, Value='JPSS-1 CMD TLM HB', Uvalue='J1CTHB')
 D_btn3 = WIDGET_BUTTON(Doc_menu, Value='IDPS RDR spec', Uvalue='RDR')
 
-; tools menu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-;Tool_menu = WIDGET_BUTTON(button_base, Value='CATs', /Menu)
-CAT_btn = WIDGET_BUTTON(button_base, Value='CAT', Uvalue='CAT', sensitive=0)
+; CAT Tools launcher button
+CAT_btn = WIDGET_BUTTON(button_base, Value='CAT', Uvalue='CAT')
 
 ; application control menu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
@@ -243,10 +252,8 @@ picwin = WIDGET_WINDOW(base, xsize=520, ysize=520) ;these values are picked base
 
 WIDGET_CONTROL, base, /REALIZE
 
-; set the working directory for Tool files depending on platform
-
-workdir = (!version.os_family eq 'windows') ? 'C:\TLM-Tool' : 'C:\TLM-Tool'
-
+CD, CURRENT=c ; find the current working directory 
+workdir = c
 ; set the draw window current and draw to it
 
 widget_control, picwin, get_value=picID
@@ -262,7 +269,3 @@ im = image(fname, /CURRENT)
 XMANAGER, "Tool2", base, GROUP_LEADER = GROUP, /NO_BLOCK
 
 END
-
-;!P.font = 0
-;device, set_font = '8x13'
-; list fonts with xlsfonts
