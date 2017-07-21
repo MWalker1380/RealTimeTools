@@ -4,29 +4,32 @@ PRO file_select, event
 END
 
 PRO tlm_event, event
-  COMMON share, Plot, np
+  COMMON Plot, np, epoch
   COMMON draw, draw
   IF (np eq 1) THEN BEGIN
     COMMON clearer, graphicWin
     graphicWin.ERASE
   END
-  IF (event.INDEX EQ 0) THEN p=mechPlot1()
-  IF (event.INDEX EQ 1) THEN p=mechPlot2()
-  IF (event.INDEX EQ 2) THEN p=mechPlot3()
-  IF (event.INDEX EQ 3) THEN p=mechPlot4()
-  IF (event.INDEX EQ 4) THEN p=mechPlot5()
-  IF (event.INDEX EQ 5) THEN p=mechPlot6()
-  IF (event.INDEX EQ 6) THEN p=powerPlot1()
-  IF (event.INDEX EQ 7) THEN p=powerPlot2()
-  IF (event.INDEX EQ 8) THEN p=currentPlot1()
-  IF (event.INDEX EQ 9) THEN p=currentPlot2()
-  IF (event.INDEX EQ 10) THEN p=currentPlot3()
-  IF (event.INDEX EQ 11) THEN p=currentPlot4()
+  
+  case event.INDEX of
+    0 : p=mechPlot1()
+    1 : p=mechPlot2()
+    2 : p=mechPlot3()
+    3 : p=mechPlot4()
+    4 : p=mechPlot5()
+    5 : p=mechPlot6()
+    6 : p=powerPlot1()
+    7 : p=powerPlot2()
+    8 : p=currentPlot1()
+    9 : p=currentPlot2()
+    10 : p=currentPlot3()
+    11 : p=currentPlot4()
+  endcase
   np = 1
 END
 
 PRO sci_event, event
-  COMMON share, Plot, np
+  COMMON Plot, np, epoch
   COMMON draw, draw
   IF (np eq 1) THEN BEGIN
     COMMON clearer, graphicWin
@@ -38,7 +41,7 @@ PRO sci_event, event
 END
 
 PRO MW_Window, GROUP=GROUP, BLOCK=block
-  COMMON share, Plot, np
+  COMMON Plot, np, epoch
   COMMON clearer, graphicWin
   COMMON draw, draw
   IF N_ELEMENTS(block) EQ 0 THEN block=0
@@ -66,7 +69,7 @@ PRO MW_Window, GROUP=GROUP, BLOCK=block
     slide1 = WIDGET_SLIDER(Slide, SCR_XSIZE=288)
     slide2 = WIDGET_SLIDER(Slide, SCR_XSIZE=288)
   Plot = WIDGET_BASE(Right, TITLE = "Right",/column)
-    draw = WIDGET_WINDOW(Plot, xsize=800, ysize=300)
+    draw = WIDGET_WINDOW(Plot, xsize=850, ysize=500)
   CalPar = WIDGET_BASE(Right, TITLE = "Right",/row, /ALIGN_CENTER)
   Cal = WIDGET_BASE(CalPar, TITLE = "Right",/column)
     label = WIDGET_LABEL(Cal, VALUE='Data Type')
@@ -94,7 +97,11 @@ PRO MW_Window, GROUP=GROUP, BLOCK=block
   XMANAGER, 'MW_Window', Plot, /NO_BLOCK
   WIDGET_CONTROL, draw, GET_VALUE = graphicWin
   graphicWin.SELECT
+  
   np=0
+  
+  epoch = julday(01, 01, 1958) ; This line converts the NASA epoch of 01-01-1958 to days since the epoch of the julian calendar 
+  
   XManager, "MW_Window", Tlm, EVENT_HANDLER = "tlm_event", /no_block
   XManager, "MW_Window", Sci, EVENT_HANDLER = "sci_event", /no_block
   XManager, "MW_Window", selectFile, EVENT_HANDLER = "file_select", /no_block
