@@ -20,7 +20,8 @@ function versionPlot
   y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 16, 2, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
-  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Time (Seconds Elapsed)', 'Version number of the RDR')
+  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Version number of the RDR')
+  return, x1[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
 END
 
 function contPlot
@@ -42,5 +43,7 @@ function contPlot
   y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 25, 1, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
-  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Time (Seconds Elapsed)', 'Version number of the RDR')
+  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Version number of the RDR')
+  
+  return, x1[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
 END

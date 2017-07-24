@@ -53,12 +53,11 @@ function getTimes, file, rdrType, maxGranNum, indexInPacket, header
     days = getParam(file, rdrType, maxGranNum, indexInPacket, 2, header)
     milliseconds = getParam(file, rdrType, maxGranNum, indexInPacket+2, 4, header)
     microseconds = getParam(file, rdrType, maxGranNum, indexInPacket+6, 2, header)
-    millidays = MAKE_ARRAY(days.LENGTH, /DOUBLE)
-    millidays[*]=DOUBLE(days[*])+DOUBLE(milliseconds[*])/(8.64e+7)+DOUBLE(microseconds[*]/(8.64e+10))
-    adding.Add, DOUBLE(millidays[*])
+    days_arr = MAKE_ARRAY(days.LENGTH, /DOUBLE)
+    days_arr[*]=DOUBLE(days[*])+DOUBLE(milliseconds[*]/(8.64e+7))+DOUBLE(microseconds[*]/(8.64e+10))
+    adding.Add, DOUBLE(days_arr[*])
   toReturn = adding.ToArray(TYPE='DOUBLE')
-  toReturn[*] = toReturn[*] - MIN(toReturn[*])
-  return, toReturn*86400
+  return, toReturn ; return time since 01-01-1958 in days (and a fraction for less than a day)
 end
 
 ;Get the starting index of a packet -----
@@ -76,12 +75,18 @@ function packetIndex, rdrType, file, granule, packetNum
 end
 
 ;Create 2D plot of a parameter over time ------
-function plotVsTime, times, data, mtitl, xtitl, ytitl
+function plotVsTime, times, data, mtitl, ytitl
+  labDate = label_date(date_format=['%H:%I:%S']) ; generate placeholder for label date format
   tdiff = DOUBLE((DOUBLE(MAX(times[*]))-DOUBLE(MIN(times[*])))/7)
   ddiff = DOUBLE((DOUBLE(MAX(data[*]))-DOUBLE(MIN(data[*])))/7)
-  p = plot(times[*],data[*],xrange=[DOUBLE(MIN(times[*])-tdiff),DOUBLE(MAX(times[*])$
-    +tdiff)],yrange=[DOUBLE(MIN(data[*])-ddiff),DOUBLE(MAX(data[*])+ddiff)],$
-    title= mtitl, xtitle=xtitl, ytitle=ytitl, /CURRENT)
+    
+  p = plot(times,data,xrange=[DOUBLE(MIN(times[*])),DOUBLE(MAX(times)$
+    +tdiff)],yrange=[DOUBLE(MIN(data)-ddiff),DOUBLE(MAX(data)+ddiff)], $
+    title= mtitl, xtitle='Time (HH:MM:SS)', ytitle=ytitl, xtickformat='LABEL_DATE', /CURRENT)
+  
+  a = p.axes[0] ; retrieve x-axis axes object
+  a.text_orientation = 45.0 ; set orientation to 45 degrees
+   
 end
 
 ;Create 3D plot of a two parameters over time ------
