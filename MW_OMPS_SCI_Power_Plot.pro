@@ -1,7 +1,7 @@
 ;Mike Walker
 
 ;Launch plots for Power -----
-function versionPlot
+function versionPlot, epoch
   COMMON filePick, files
   file = files
 
@@ -16,7 +16,7 @@ function versionPlot
   
   number_grans = 0
 
-  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera)
+  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
   y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 16, 2, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
@@ -24,7 +24,7 @@ function versionPlot
   return, x1[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
 END
 
-function contPlot
+function contPlot, epoch
   COMMON filePick, files
   file = files
 
@@ -39,7 +39,7 @@ function contPlot
 
   number_grans = 0
 
-  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera)
+  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
   y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 25, 1, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
