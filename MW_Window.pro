@@ -3,13 +3,49 @@ PRO file_select, event
   files = dialog_pickfile(/multiple_files)
 END
 
-PRO tlm_event, event
+PRO clearPlots
   COMMON Plot, np, epoch
   COMMON draw, draw
   IF (np eq 1) THEN BEGIN
     COMMON clearer, graphicWin
     graphicWin.ERASE
   END
+  np = 1
+END
+
+PRO pback_event, event
+  COMMON Plot, np, epoch
+  COMMON filePick, files
+  COMMON draw, draw
+  COMMON speed, speed
+  COMMON times, times
+  COMMON values, values
+  COMMON cycle, cycle
+
+  case event.INDEX of
+    0 : speed = -1
+    1 : speed = 1
+    2 : speed = 2
+    3 : speed = 3
+    4 : speed = 4
+    5 : speed = 5
+  endcase
+  
+  header = MAKE_ARRAY(2, /LONG)
+  header[0]=10
+  header[1]=32
+  
+  times=getTimes(files, 'OMPS-TELEMETRY-RDR_All', 0, 6, header)
+  values=getParam(files, 'OMPS-TELEMETRY-RDR_All', 0, 625, 2, header)
+  
+  cycle = 0
+  playing
+END
+
+PRO tlm_event, event
+  COMMON Plot, np, epoch
+  COMMON draw, draw
+  c = clearPlots()
   
   case event.INDEX of
     0 : p=mechPlot1()
@@ -31,10 +67,7 @@ END
 PRO sci_event, event
   COMMON Plot, np, epoch
   COMMON draw, draw
-  IF (np eq 1) THEN BEGIN
-    COMMON clearer, graphicWin
-    graphicWin.ERASE
-  END
+  c = clearPlots()
   IF (event.INDEX EQ 0) THEN p=versionPlot()
   IF (event.INDEX EQ 1) THEN p=contPlot()
   np = 1
@@ -90,7 +123,7 @@ PRO MW_Window, GROUP=GROUP, BLOCK=block
   selectFile=WIDGET_BUTTON(CalPar, VALUE='Select RDR Files')
   Playback = WIDGET_BASE(CalPar, TITLE = "Playback",/column)
     label = WIDGET_LABEL(Playback, VALUE='Playback')
-    pback_labels = ['None', '1X', '2X', '5X', '10X', '20X', '50X', '100X']
+    pback_labels = ['Select', '1X', '2X', '3X', '4X', '5X']
     drop = WIDGET_DROPLIST(Playback, VALUE=pback_labels)
 
   WIDGET_CONTROL, Window, /REALIZE
@@ -104,5 +137,29 @@ PRO MW_Window, GROUP=GROUP, BLOCK=block
   
   XManager, "MW_Window", Tlm, EVENT_HANDLER = "tlm_event", /no_block
   XManager, "MW_Window", Sci, EVENT_HANDLER = "sci_event", /no_block
+  XManager, "MW_Window", Playback, EVENT_HANDLER = "pback_event", /no_block
   XManager, "MW_Window", selectFile, EVENT_HANDLER = "file_select", /no_block
 end
+
+PRO playing, id, userData
+  ;Common Parameters
+  COMMON Plot, np, epoch
+  COMMON draw, draw
+  COMMON speed, speed
+  COMMON times, times
+  COMMON values, values
+  COMMON cycle, cycle
+  
+  ;Start plotting if a speed has been selected
+  if speed ne -1 then begin
+    COMPILE_OPT IDL2
+      ;Clear existing plots
+      c = clearPlots()
+      ;Plot given set of value and their times, depending on which iteration of the data set (cycle)
+      p1=plotVsTime( times[0:cycle], values[0:cycle], 'Nadir Diffuser Move Destination', 'Time (Seconds Elapsed)', 'Position')
+    ;Increase cycle for next call
+    cycle++
+    ;If not yet through all values, call another plot in 5/speed seconds
+    if cycle lt times.LENGTH then id = Timer.Set(5/speed, 'playing')
+  end
+END
