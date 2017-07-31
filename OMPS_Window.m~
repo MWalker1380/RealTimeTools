@@ -329,6 +329,7 @@ function playBack(handles)
             offset = uint32(0); % offset between firt packet and curr packet
             disp 'new gran'
             for j = 1:numPkts
+                tic
                 packetStartInd = offset + firstPacketStartInd;
                 % the 5th and 6th bytes is the packet size in bytes minus  1 (excluding the primary header). Add this to the offset for the next packet
                 currInd = apStrgOffst + packetStartInd;
@@ -344,8 +345,8 @@ function playBack(handles)
                 end
                     
                 if vecInd == 50
-                   paramVec(1:end-1) = paramVec(2:end); % lop off the beginning to keep the newest points
-                   timeVec(1:end-1) = timeVec(2:end); 
+                   paramVec = [paramVec(2:end) 0]; % lop off the beginning to keep the newest points
+                   timeVec = [timeVec(2:end) 0]; 
                 end
         
         
@@ -353,6 +354,7 @@ function playBack(handles)
                     + double(swapbytes(typecast(granule((currInd + 8):(currInd+11)), 'uint32')))/86400000 ...% millis
                     + double(swapbytes(typecast(granule((currInd + 12):(currInd+13)), 'uint16')))/86400000000 ...% micros
                     + handles.epoch ; % NASA epoch
+                
                 set(handles.text5, 'string',['Time: ' datestr(timeVec(vecInd), 'HH:MM:SS mm-dd-yyyy')]) % place time in text box12
                 
                 paramInd = currInd + handles.indInPkt;
@@ -371,19 +373,15 @@ function playBack(handles)
                 
                 % set the axis limits so that the newest point is not
                 % touching the right wall of the axis window
-              %  minPV = min(paramVec); maxPV = max(paramVec); 
-               % axis(handles.axes1, [min(timeVec) (86400*max(timeVec)/86000) (minPV-abs(minPV)/4) (maxPV+maxPV/4)])
+               % axis(handles.axes1, [min(timeVec) (86400*max(timeVec)/86350) (min(paramVec)-1) (max(paramVec)+1)])
                 
                 set(handles.axes1, 'XTickLabelRotation', 45) % rotate the x axis
-                
-                % This is the main bottleneck
                 datetick(handles.axes1, 'x', 'HH:MM:SS', 'keeplimits', 'keepticks') % make the x axis show date strings 
                 
                 guidata(handles.axes1, handles); % allows guifunction to update the graphics
-
+                toc
                 
-                % TODO change this to real time. Maybbe increase max for
-                % playback rate options
+                % TODO change this to real time
                 pause(0.1/handles.playback_rate);
                 
                 
