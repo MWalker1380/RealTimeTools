@@ -3,7 +3,7 @@ PRO file_select, event
   files = dialog_pickfile(/multiple_files)
 END
 
-PRO clearPlots
+function clearPlots
   COMMON Plot, np, epoch
   COMMON draw, draw
   IF (np eq 1) THEN BEGIN
