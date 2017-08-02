@@ -22,7 +22,7 @@ function varargout = OMPS_Window(varargin)
 
 % Edit the above text to modify the response to help OMPS_Window
 
-% Last Modified by GUIDE v2.5 30-Jul-2017 22:32:49
+% Last Modified by GUIDE v2.5 31-Jul-2017 10:18:14
 
 % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -258,8 +258,8 @@ function playBack(handles)
 
     files = [files{:}]; % coerce into singleton cell array
     
-    timeVec = zeros(50,1); % these vectors will be used for plotting. We will cut the beginning off as needed whenn we have sufficient points
-    paramVec = zeros(50,1); % preallocate them for speed. We only use up to the amount of points we have to plot, so the zeros wil not be present
+    timeVec = nan(50,1); % these vectors will be used for plotting. We will cut the beginning off as needed whenn we have sufficient points
+    paramVec = nan(50,1); % preallocate them for speed. We only use up to the amount of points we have to plot, so the zeros wil not be present
 
     vecInd = 1; % Use this to index the vectors.  Set  the threshold of points on the screen to 50
     
@@ -327,8 +327,10 @@ function playBack(handles)
             % pertaining to that specific index
             firstPacketStartInd = swapbytes(typecast(granule((pktTrackerOffset+trackerInd+17):(pktTrackerOffset+trackerInd+20)), 'uint32')) + uint32(1);
             offset = uint32(0); % offset between firt packet and curr packet
-            disp 'new gran'
             for j = 1:numPkts
+                
+                if ~get(handles.togglebutton2, 'value'), return;end
+                
                 packetStartInd = offset + firstPacketStartInd;
                 % the 5th and 6th bytes is the packet size in bytes minus  1 (excluding the primary header). Add this to the offset for the next packet
                 currInd = apStrgOffst + packetStartInd;
@@ -349,6 +351,31 @@ function playBack(handles)
                 end
         
         
+                OMNDPAMDI = double(getSingleParam(granule, 628, 2, 0, 'int16'));
+                OMNDPBMDI = double(getSingleParam(granule, 630, 2, 0, 'int16'));
+                OMLMPAMDI = double(getSingleParam(granule, 632, 2, 0, 'int16'));
+                OMLMPBMDI = double(getSingleParam(granule, 634, 2, 0, 'int16'));
+                
+                OMNDP28I = double(getSingleParam(granule, 636, 2, 0, 'int16'));  
+                OMTECI =double( getSingleParam(granule, 626, 2, 0, 'int16'));
+                OMTCTECI = double(getSingleParam(granule, 638, 2, 0, 'int16'));
+                OMNPTECI = double(getSingleParam(granule, 638, 2, 0, 'int16'));
+    
+                convAB = 0.00008558;
+                convTecTot = 0.00123;
+                convTecNpTc = 0.000305;
+                conv28 = 0.000227;
+                set(handles.text6, 'String', ['Nadir A Curr: ' num2str( convAB * OMNDPAMDI ) ' Amps'] )
+                set(handles.text7, 'String', ['Nadir B Curr: ' num2str( convAB * OMNDPBMDI ) ' Amps'] )
+                set(handles.text8, 'String', ['Limb A Curr: ' num2str( convAB * OMLMPAMDI ) ' Amps'] )
+                set(handles.text9, 'String', ['Limb B Curr: ' num2str( convAB * OMLMPBMDI ) ' Amps'] )
+                set(handles.text10, 'String', ['Nadir Inpt Curr: ' num2str( conv28 * OMNDP28I ) ' Amps'] )
+                set(handles.text11, 'String', ['TEC Tot Curr: ' num2str( convTecTot * OMTECI ) ' Amps'] )
+                set(handles.text12, 'String', ['TC TEC Curr: ' num2str( convTecNpTc * OMTCTECI ) ' Amps'] )
+                set(handles.text13, 'String', ['NP TEC Curr: ' num2str( convTecNpTc * OMNPTECI ) ' Amps'] )
+
+               
+                
                 timeVec(vecInd) = double(swapbytes(typecast(granule((currInd + 6):(currInd+7)), 'uint16'))) ... % days
                     + double(swapbytes(typecast(granule((currInd + 8):(currInd+11)), 'uint32')))/86400000 ...% millis
                     + double(swapbytes(typecast(granule((currInd + 12):(currInd+13)), 'uint16')))/86400000000 ...% micros
@@ -367,7 +394,9 @@ function playBack(handles)
                 % plot only up to the amount of data we have, since the
                 % arrays are preallocated. This will soon inlclude the
                 % entire array. after vecInd = 50
-                plot(handles.axes1, timeVec(1:vecInd), paramVec(1:vecInd));
+                plot(handles.axes1, timeVec, paramVec, 'LineWidth', 2);
+                
+                title(handles.plot_title)
                 
                 % set the axis limits so that the newest point is not
                 % touching the right wall of the axis window
@@ -499,7 +528,6 @@ function popupmenu4_Callback(hObject, eventdata, handles)
     str =  get(handles.popupmenu4,'string');
     handles.playback_rate = str2double(str(get(handles.popupmenu4, 'value'))); 
     updatePannel(handles)
-    playBack(handles)
     guidata(hObject, handles)
     
 % --- Executes during object creation, after setting all properties.
@@ -513,3 +541,15 @@ function popupmenu4_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in togglebutton2.
+function togglebutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton2
+    handles.isPlaying = get(handles.togglebutton2, 'value');
+    playBack(handles)
+    guidata(hObject, handles)
