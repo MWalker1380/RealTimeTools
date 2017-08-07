@@ -37,10 +37,7 @@ PRO pback_event, event
   header = MAKE_ARRAY(2, /LONG)
   header[0]=10
   header[1]=32
-
-  times=getTimes(files, 'OMPS-TELEMETRY-RDR_All', 0, 6, header)
-  values=getParam(files, 'OMPS-TELEMETRY-RDR_All', 0, 804, 2, header)
-
+  c = clearPlots()
   cycle = 0
   playing
 END
@@ -179,7 +176,6 @@ function pop_omps_tlm_boxes, handles, files_tmp
     indexInPacket = 626 ; index in packet in bytes. From OMPS xml database
     tecCurr = getParam(file,'OMPS-TELEMETRY-RDR_All', maxgran , indexInPacket, byteSize, header, type='UINT') ; get the newest points
     tecCurr = tecCurr[-1] ; get single newest point
-
 
     indexInPacket = 30 ; index in packet in bytes. From OMPS xml database
     byteSize = 1 ; This one is only one byte
@@ -345,6 +341,8 @@ PRO playing, id, userData
   COMMON times, times
   COMMON values, values
   COMMON cycle, cycle
+  COMMON mainLabel, mainLabel
+  COMMON xLabel, xLabel
 
   ;Start plotting if a speed has been selected
   if speed ne -1 then begin
@@ -352,7 +350,7 @@ PRO playing, id, userData
     ;Clear existing plots
     c = clearPlots()
     ;Plot given set of value and their times, depending on which iteration of the data set (cycle)
-    p1=plotVsTime( times[0:cycle], values[0:cycle], 'Nadir Diffuser Move Destination', 'Position')
+    p1=plotVsTime( times[0:cycle], values[0:cycle], mainLabel, xLabel)
     ;Increase cycle for next call
     cycle++
     ;If not yet through all values, call another plot in 5/speed seconds

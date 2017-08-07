@@ -29,10 +29,7 @@ if !version.os_family eq 'unix' then begin ; if we are on a UNIX system
   case eventuval of
     
     'ACC' : LW_PLOT_ATMS
-    'OmpsTlmPower' : MW_OMPS_TLM_Power_Plot
-    'OmpsTlmTemp' : MW_OMPS_TLM_Temp_Plot
-    'OmpsTlmMotorCurrent' : MW_OMPS_TLM_Current_Plot
-    'OmpsSciTest' : MW_OMPS_SCI_Power_Plot
+    'OMPS' : MW_Window
     'AOM' : spawn, reader+docsdir+atmsOps
     'AIS' : spawn, reader+docsdir+atmsSpc
     
@@ -173,27 +170,7 @@ C_btn3 = WIDGET_BUTTON(CrIS_menu, Value='References', /menu)
 
 ; OMPS menu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-OMPS_menu = WIDGET_BUTTON(button_base, Value='OMPS', /Menu)
-O_btn1 = WIDGET_BUTTON(OMPS_menu, Value='APID Time Series', /menu)
-  O_1a = WIDGET_BUTTON(O_btn1, Value='TLM power', Uvalue='OmpsTlmPower')
-  O_1b = WIDGET_BUTTON(O_btn1, Value='TLM diffuser mechanism',sensitive=0)
-  O_1c = WIDGET_BUTTON(O_btn1, Value='TLM thermo cooler',sensitive=0)
-  O_1d = WIDGET_BUTTON(O_btn1, Value='TLM motor current', Uvalue='OmpsTlmMotorCurrent')
-  O_1e = WIDGET_BUTTON(O_btn1, Value='SCI power', sensitive=0)
-  O_1f = WIDGET_BUTTON(O_btn1, Value='SCI diffuser mechanism',sensitive=0)
-  O_1g = WIDGET_BUTTON(O_btn1, Value='SCI thermo cooler',sensitive=0)
-  O_1h = WIDGET_BUTTON(O_btn1, Value='SCI motor current',sensitive=0)
-  O_1e = WIDGET_BUTTON(O_btn1, Value='SCI test', Uvalue='OmpsSciTest')
-  O_1i = WIDGET_BUTTON(O_btn1, Value='xTLM temperature', Uvalue='OmpsTlmTemp')
-O_btn2 = WIDGET_BUTTON(OMPS_menu, Value='Perceptive Parameters', /menu)
-  O_2a = WIDGET_BUTTON(O_btn2, Value='noise',sensitive=0)
-  O_2b = WIDGET_BUTTON(O_btn2, Value='full well',sensitive=0)
-  O_2c = WIDGET_BUTTON(O_btn2, Value='dark current',sensitive=0)
-O_btn3 = WIDGET_BUTTON(OMPS_menu, Value='References', /menu)
-  O_3a = WIDGET_BUTTON(O_btn3, Value='Instrument Spec', sensitive=0)
-  O_3b = WIDGET_BUTTON(O_btn3, Value='Ops Manual', Uvalue='OOM')
-  O_3c = WIDGET_BUTTON(O_btn3, Value='Test Proc',sensitive=0)
-  
+Q_btn = WIDGET_BUTTON(button_base, Value='OMPS', Uvalue='OMPS')
 
 ; VIIRS menu vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 

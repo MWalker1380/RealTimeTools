@@ -3,7 +3,13 @@
 ;Launch plots for Power -----
 function versionPlot, epoch
   COMMON filePick, files
+  COMMON times, times
+  COMMON values, values
+  COMMON mainLabel, mainLabel
+  COMMON xLabel, xLabel
   file = files
+  mainLabel = 'OMPS-Science Data Grab Test'
+  xLabel = 'Version number of the RDR'
 
   ;Specify first bytes of a packet
   headera = MAKE_ARRAY(2, /BYTE)
@@ -16,17 +22,23 @@ function versionPlot, epoch
   
   number_grans = 0
 
-  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
-  y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 16, 2, headera)
+  times=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
+  values=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 16, 2, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
-  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Version number of the RDR')
-  return, x1[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
+  p1=plotVsTime( times, values, mainLabel, xLabel)
+  return, times[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
 END
 
 function contPlot, epoch
   COMMON filePick, files
+  COMMON times, times
+  COMMON values, values
+  COMMON mainLabel, mainLabel
+  COMMON xLabel, xLabel
   file = files
+  mainLabel = 'OMPS-Science Data Grab Test'
+  xLabel = 'Version number of the RDR'
 
   ;Specify first bytes of a packet
   headera = MAKE_ARRAY(2, /BYTE)
@@ -39,11 +51,11 @@ function contPlot, epoch
 
   number_grans = 0
 
-  x1=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
-  y1=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 25, 1, headera)
+  times=getTimes(file, 'OMPS-NPSCIENCE-RDR_All', 0, 6, headera) + epoch
+  values=getParam(file, 'OMPS-NPSCIENCE-RDR_All', 0, 25, 1, headera)
   ;x1=getTimes(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 6, header)
   ;y1=getParam(file, 'OMPS-NPDIAGNOSTIC-RDR_All', number_grans, 119, 2, header)
-  p1=plotVsTime( x1, y1, 'OMPS-Science Data Grab Test', 'Version number of the RDR')
+  p1=plotVsTime( times, values, mainLabel, xLabel)
   
-  return, x1[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
+  return, times[-1] ;return the last element in the time vector for the date and time box in the OMPS GUI
 END
